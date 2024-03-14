@@ -1,0 +1,106 @@
+A quick preview of the table and its schema showed it had18 columns and 116,675 rows as shown below. A dataset this huge means there’s tons of insights that can be gotten from it, and a lot of queries that can be run.
+
+
+
+My first step was to decide what insights I wanted to get from this huge dataset. This phase of data analysis is the ASK phase.
+
+Below are the questions I came up with:
+
+Which police district has the highest number of overall crime incidents?
+What crime has the highest rate in the district above?
+In what year was this particular crime highest in this district?
+What are the numbers for the clearance_status of this particular crime in the year where it was the highest?
+Calculate the length of time (in days) for each incident to be cleared by arrest.
+Next I moved on to the next phase of data analysis. The PREPARE phase. Here I created a table that contains only the columns and rows I needed from this huge dataset.
+
+For the insights I wanted to get from this dataset, I only needed the columns of unique_key, address, district, primary_type, description, timestamp, year, clearance_date and clearance_status.
+
+I used the query below to select the columns needed. I also changed the timestamp and clearance_date columns from datetime format to date only using the CAST function.
+
+
+I saved my results as a new BigQuery table:
+
+
+I moved to this new table and proceeded to the PROCESS phase of data analysis. Here I did some cleaning of the new table by following the steps outlined below.
+
+First, I inspected each column for null values.
+
+I started with the first column, unique_key and ran the query below. The unique key column had one null value as shown below.
+
+
+I repeated this process for all of the columns in my new table and found 5114 rows in the clearance_date and clearance_status columns that had null values. I observed that null values in the clearance_date column had corresponding null values in the column_status date.
+
+
+Since my insights included calculations using the distinct types of clearance status, and the sample size was 116,675 incidents, I deleted 5115 null rows from the table (1 unique_key row and 5114 clearance_status/date rows) which reduced my sample size to 111,560.
+
+
+I ran the query to check for null values again to verify all null values had been deleted.
+
+Next step in the data cleaning process was to find out how many police districts were in my dataset. I used the query below which revealed 12 distinct police districts.
+
+
+I also ran a query to reveal the distinct types of crime in the dataset. This revealed 18 different types of primary_type of crime.
+
+
+In the results above, there’s Aggravated assault as well as Agg assault. A quick google search reveals these two terms are the same. So, for consistency, I changed all rows that had Agg assault to Aggravated assault using the query below. This changed 3932 rows in the primary_type column from Agg Assault to Aggravated Assault, and reduced primary_type from 18 to 17.
+
+
+I ran the query to reveal distinct primary_type again to be sure my data was updated, and there were only 17 distinct primary_types of crime
+
+
+.
+
+Then I moved on to the ANALYSE phase of the data analysis process.
+
+QUESTION 1: Which police district has the highest number of overall crime incidents?
+
+To answer this question, I used the query below which revealed district “D” with 15,831 incidents.
+
+
+This means all insights I wanted to get from this dataset will be based on district D.
+
+QUESTION 2: What crime has the highest rate in the district above (district D)?
+
+I used the query below and it revealed Theft had the highest crime rate with a total of 7904 incidents.
+
+
+Okay this means further analysis will be based on District D Theft crimes.
+
+QUESTION 3: In what year was this particular crime highest in this district?(District D, Theft crimes)
+
+First, I used the query below to find the distinct years in district D the entire dataset covered, results show year ranges from 2014–2016.
+
+
+Next was to find out how many of the total 7904 theft incidents occured in each year in district D.
+
+The query below shows theft occurred in 2015 and 2016.
+
+There was no result for theft incidents in 2014 which was weird at first, but 4035 theft incidents in 2015 and 3869 theft incidents in 2016 added up to a total of 7904 theft incidents.
+
+
+I was interested in finding out why there were no theft crimes in 2014, but that would be a deviation from the questions I planned on answering, so hopefully I will dive into that in another post.
+
+This means subsequent analysis will be based on Theft incidents in district D for the 2015 year.
+
+QUESTION 4: What are the numbers for the clearance_status of this particular crime in the year where it was the highest?
+
+I calculated the clearance_status of theft incidents in district D in 2015 using the query below and got the results below.
+
+This shows that of the 4035 Theft incidents in district D for the 2015 year, only 585 were cleared by arrest.
+
+(p.s i added up all the clearance status number to be sure my numbers added up to 4035)
+
+
+QUESTION 5: Calculate the length of time (in days) for each incident to be cleared by arrest.
+
+For this I used simple SQL calculation and the EXTRACT function as shown in the query below:
+
+
+The results in the far right column show the length of time in days it took to make an arrest for each incident of Theft in district D for the 2015 year.
+
+There’s a lot of in depth analysis that can be done from all of these questions but my aim was to use about 8 SQL statements. For this analysis I ended up using SELECT DISTINCT, CAST, UPDATE, GROUP BY, ORDER BY, EXTRACT, DELETE, COUNT and COUNT(*) functions/statements.
+
+Feedback and suggestions are all welcome.
+
+Thank you!
+
